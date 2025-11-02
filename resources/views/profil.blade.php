@@ -299,15 +299,15 @@
     </form>
 
     <div class="right-section">
-      <div class="photo" id="photoPreview">
+      <div class="photo" id="photoPreview" tabindex="0" role="button" aria-label="Ubah foto profil">
         @if($user->foto_profil)
           <img src="{{ asset('storage/' . $user->foto_profil) }}" alt="Foto Profil">
         @else
           FOTO PROFIL
         @endif
       </div>
-      <input type="file" name="foto_profil" id="fotoInput" style="display:none;" accept="image/*">
-      <button type="button" class="upload-btn" onclick="document.getElementById('fotoInput').click()">Upload Foto</button>
+        <input type="file" name="foto_profil" id="fotoInput" style="display:none;" accept="image/*">
+        <button type="button" class="upload-btn" id="uploadBtn">Upload Foto</button>
 
       <div class="signature-box" id="signatureBox">
         @if($user->tanda_tangan)
@@ -386,6 +386,25 @@
     editBtn.style.display = 'none';
     saveBtn.style.display = 'inline-block';
   });
+
+  // Make photo clickable to open file picker
+  const photoElement = document.getElementById('photoPreview');
+  const uploadBtn = document.getElementById('uploadBtn');
+
+  function openFilePicker() {
+    document.getElementById('fotoInput').click();
+  }
+
+  if (photoElement) {
+    photoElement.addEventListener('click', openFilePicker);
+    photoElement.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') openFilePicker();
+    });
+  }
+
+  if (uploadBtn) {
+    uploadBtn.addEventListener('click', openFilePicker);
+  }
 
   // Photo cropping setup
   function initCroppie() {

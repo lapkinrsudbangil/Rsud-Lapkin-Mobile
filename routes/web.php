@@ -28,6 +28,16 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard.direktur');
     
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    
+    // Perjanjian & Laporan
+    Route::get('/perjanjian', [App\Http\Controllers\PerjanjianController::class, 'index'])->name('perjanjian.index');
+    Route::get('/perjanjian/create', [App\Http\Controllers\PerjanjianController::class, 'create'])->name('perjanjian.create');
+    Route::post('/perjanjian', [App\Http\Controllers\PerjanjianController::class, 'store'])->name('perjanjian.store');
+
+    Route::get('/laporan', [App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/create/{id}', [App\Http\Controllers\LaporanController::class, 'createFromPerjanjian'])->name('laporan.create_from_perjanjian');
+    Route::post('/laporan', [App\Http\Controllers\LaporanController::class, 'store'])->name('laporan.store');
+    Route::get('/laporan/my', [App\Http\Controllers\LaporanController::class, 'myReports'])->name('laporan.my');
 });
 
 // === LOGIN ===

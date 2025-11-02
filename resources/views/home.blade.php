@@ -268,7 +268,7 @@
       <div class="card">
         <img src="{{ asset('images/icon_perjanjian.png') }}" alt="Perjanjian">
         <h3>Perjanjian</h3>
-        <a href="{{ route('profil') }}">
+        <a href="{{ route('perjanjian.index') }}">
           <button>Buka</button>
         </a>
       </div>
@@ -276,7 +276,7 @@
       <div class="card">
         <img src="{{ asset('images/icon_kinerja.png') }}" alt="Laporan Kinerja">
         <h3>Laporan Kinerja</h3>
-        <a href="{{ route('profil') }}">
+        <a href="{{ route('laporan.index') }}">
           <button>Buka</button>
         </a>
       </div>
