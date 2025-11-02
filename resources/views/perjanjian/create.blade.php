@@ -45,15 +45,39 @@
         <input name="judul" class="form-control" required>
       </div>
 
-      <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-        <div>
-          <label>Deskripsi</label>
-          <textarea name="deskripsi" class="form-control"></textarea>
+      <!-- Template area: description + indikator table -->
+      <div style="margin-top:12px;">
+        <label>Deskripsi (Template)</label>
+        <textarea name="deskripsi" id="deskripsiField" class="form-control" rows="6"></textarea>
+      </div>
+
+      <div style="margin-top:12px;">
+        <label>Daftar Indikator</label>
+        <div style="overflow:auto; border:1px solid #eee; padding:8px; border-radius:8px; background:#fff;">
+          <table id="indikatorTable" style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="background:#f6f6f6;">
+                <th style="padding:6px; border:1px solid #eee;">Indikator</th>
+                <th style="padding:6px; border:1px solid #eee;">Satuan</th>
+                <th style="padding:6px; border:1px solid #eee;">Target</th>
+                <th style="padding:6px; border:1px solid #eee; width:120px;">Bobot (%)</th>
+                <th style="padding:6px; border:1px solid #eee; width:120px;">Keterangan</th>
+                <th style="padding:6px; border:1px solid #eee; width:60px;"><button type="button" id="addIndikatorBtn" class="btn">+</button></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-name" placeholder="Contoh: Angka Kematian Ibu"></td>
+                <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-satuan" placeholder="% / pasien / kasus"></td>
+                <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-target" placeholder="Contoh: 5"></td>
+                <td style="padding:6px; border:1px solid #eee;"><input type="number" step="0.01" class="form-control indikator-bobot" placeholder="10"></td>
+                <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-ket" placeholder="Catatan"></td>
+                <td style="padding:6px; border:1px solid #eee; text-align:center;"><button type="button" class="btn removeRowBtn">-</button></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div>
-          <label>Indikator (JSON)</label>
-          <textarea name="indikator" class="form-control" placeholder='{"indikator":"contoh"}'></textarea>
-        </div>
+        <input type="hidden" name="indikator" id="indikatorJsonInput">
       </div>
 
   <hr style="margin:18px 0; border:none; border-top:1px solid #eee;">
@@ -110,9 +134,51 @@
   const s1 = initSig('sigPihak1', 'pihak1_signature');
   const s2 = initSig('sigPihak2', 'pihak2_signature');
 
-  document.getElementById('savePerjanjianBtn').addEventListener('click', () => {
+  document.getElementById('savePerjanjianBtn').addEventListener('click', (e) => {
+    // save signatures
     s1.save(); s2.save();
+    // collect indikator table rows into hidden input as JSON
+    collectIndikatorRows();
+    // allow form to submit
   });
+
+  // indikator table helpers
+  const addBtn = document.getElementById('addIndikatorBtn');
+  addBtn.addEventListener('click', () => addIndikatorRow());
+
+  function addIndikatorRow(data = {}) {
+    const tbody = document.querySelector('#indikatorTable tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-name" value="${escapeHtml(data.name||'')}" placeholder="Contoh: ..."></td>
+      <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-satuan" value="${escapeHtml(data.satuan||'')}" placeholder="% / pasien / kasus"></td>
+      <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-target" value="${escapeHtml(data.target||'')}" placeholder="Contoh: 5"></td>
+      <td style="padding:6px; border:1px solid #eee;"><input type="number" step="0.01" class="form-control indikator-bobot" value="${escapeHtml(data.bobot||'')}"></td>
+      <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-ket" value="${escapeHtml(data.ket||'')}"></td>
+      <td style="padding:6px; border:1px solid #eee; text-align:center;"><button type="button" class="btn removeRowBtn">-</button></td>
+    `;
+    tbody.appendChild(tr);
+    tr.querySelector('.removeRowBtn').addEventListener('click', () => tr.remove());
+  }
+
+  function collectIndikatorRows() {
+    const rows = [];
+    document.querySelectorAll('#indikatorTable tbody tr').forEach(r => {
+      const name = r.querySelector('.indikator-name')?.value || '';
+      const satuan = r.querySelector('.indikator-satuan')?.value || '';
+      const target = r.querySelector('.indikator-target')?.value || '';
+      const bobot = r.querySelector('.indikator-bobot')?.value || '';
+      const ket = r.querySelector('.indikator-ket')?.value || '';
+      if (name.trim() !== '') {
+        rows.push({ indikator: name.trim(), satuan: satuan.trim(), target: target.trim(), bobot: bobot === '' ? null : parseFloat(bobot), keterangan: ket.trim() });
+      }
+    });
+    document.getElementById('indikatorJsonInput').value = JSON.stringify(rows);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 
   // Auto-populate description template based on jenis & change mode
   (function(){

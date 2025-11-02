@@ -26,7 +26,8 @@
             <div style="font-size:13px; color:#666; margin-bottom:8px;">{{ $p->jabatan }} • {{ $p->tahun }} @if($p->tanggal_pembuatan) • {{ $p->tanggal_pembuatan }} @endif</div>
             <div style="display:flex; gap:8px;">
               <a href="{{ route('laporan.create_from_perjanjian', $p->id) }}" class="btn">Buat Laporan</a>
-              <a href="#" class="btn" style="background:#007bff;">Export</a>
+              <a href="{{ route('perjanjian.print', $p->id) }}" target="_blank" class="btn" style="background:#007bff;">Lihat Cetak</a>
+              <a href="{{ route('perjanjian.pdf', $p->id) }}" target="_blank" class="btn" style="background:#28a745;">Export PDF</a>
             </div>
           </div>
         @endforeach

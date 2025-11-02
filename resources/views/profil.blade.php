@@ -293,30 +293,35 @@
       <input type="text" name="divisi" value="{{ $user->divisi }}" readonly>
 
       <input type="hidden" name="signature_data" id="signatureData">
+      <input type="hidden" id="croppedPhotoData" name="croppedPhotoData">
 
       <button type="button" class="edit-btn" id="editBtn">Edit Profil</button>
       <button type="submit" class="edit-btn" id="saveBtn" style="display:none;">Simpan</button>
-    </form>
-
-    <div class="right-section">
-      <div class="photo" id="photoPreview" tabindex="0" role="button" aria-label="Ubah foto profil">
-        @if($user->foto_profil)
-          <img src="{{ asset('storage/' . $user->foto_profil) }}" alt="Foto Profil">
-        @else
-          FOTO PROFIL
-        @endif
-      </div>
+    
+      <div class="right-section">
+        <div class="photo" id="photoPreview" tabindex="0" role="button" aria-label="Ubah foto profil">
+          @if($user->foto_profil)
+            @php
+              $fp = $user->foto_profil;
+            @endphp
+            <img src="{{ (str_starts_with($fp, 'http') || str_starts_with($fp, 'https')) ? $fp : asset('storage/' . $fp) }}" alt="Foto Profil">
+          @else
+            FOTO PROFIL
+          @endif
+        </div>
         <input type="file" name="foto_profil" id="fotoInput" style="display:none;" accept="image/*">
         <button type="button" class="upload-btn" id="uploadBtn">Upload Foto</button>
 
-      <div class="signature-box" id="signatureBox">
-        @if($user->tanda_tangan)
-          <img src="{{ asset('storage/' . $user->tanda_tangan) }}" width="200" height="100">
-        @else
-          Klik untuk tanda tangan
-        @endif
+        <div class="signature-box" id="signatureBox">
+          @if($user->tanda_tangan)
+            @php $tt = $user->tanda_tangan; @endphp
+            <img src="{{ (str_starts_with($tt, 'http') || str_starts_with($tt, 'https')) ? $tt : asset('storage/' . $tt) }}" width="200" height="100">
+          @else
+            Klik untuk tanda tangan
+          @endif
+        </div>
       </div>
-    </div>
+    </form>
   </div>
 </main>
 
@@ -359,8 +364,7 @@
   </div>
 </div>
 
-<input type="hidden" id="croppedPhotoData" name="croppedPhotoData">
-<input type="hidden" id="signatureData" name="signatureData">
+
 
 <!-- Include Croppie dan SignaturePad JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>

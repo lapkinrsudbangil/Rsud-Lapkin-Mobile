@@ -33,6 +33,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/perjanjian', [App\Http\Controllers\PerjanjianController::class, 'index'])->name('perjanjian.index');
     Route::get('/perjanjian/create', [App\Http\Controllers\PerjanjianController::class, 'create'])->name('perjanjian.create');
     Route::post('/perjanjian', [App\Http\Controllers\PerjanjianController::class, 'store'])->name('perjanjian.store');
+    Route::get('/perjanjian/{id}/print', [App\Http\Controllers\PerjanjianController::class, 'print'])->name('perjanjian.print');
+    Route::get('/perjanjian/{id}/pdf', [App\Http\Controllers\PerjanjianController::class, 'pdf'])->name('perjanjian.pdf');
 
     Route::get('/laporan', [App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/create/{id}', [App\Http\Controllers\LaporanController::class, 'createFromPerjanjian'])->name('laporan.create_from_perjanjian');
