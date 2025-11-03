@@ -105,8 +105,16 @@
         <p class="subtext">Gunakan password yang kuat - minimal 8 karakter.</p>
 
         <!-- FORM -->
+        @if (session('status'))
+            <div style="background:#d4edda;color:#155724;padding:10px;border-radius:8px;margin-bottom:12px;">{{ session('status') }}</div>
+        @endif
+        @if (session('error'))
+            <div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:8px;margin-bottom:12px;">{{ session('error') }}</div>
+        @endif
+
         <form method="POST" action="{{ route('reset.post') }}">
             @csrf
+            <input type="hidden" name="email" value="{{ session('email') }}">
             <input type="password" name="password" placeholder="Password Baru" required>
             <input type="password" name="password_confirmation" placeholder="Konfirmasi Password" required>
             <button type="submit">SIMPAN</button>

@@ -117,10 +117,18 @@
             <img src="{{ asset('images/logo_rsud.png') }}" alt="Logo rsud">
         </div>
         <h2>Verifikasi Kode</h2>
-        <p>Kode 6 digit telah dikirim ke email Anda.</p>
+    <p>Kode 6 digit telah dikirim ke email Anda ({{ session('email') }}).</p>
+
+        @if (session('status'))
+            <div style="background:#d4edda;color:#155724;padding:10px;border-radius:8px;margin-bottom:12px;">{{ session('status') }}</div>
+        @endif
+        @if (session('error'))
+            <div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:8px;margin-bottom:12px;">{{ session('error') }}</div>
+        @endif
 
         <form action="{{ route('verify.code') }}" method="POST">
             @csrf
+            <input type="hidden" name="email" value="{{ session('email') }}">
             <div class="code-inputs">
                 @for ($i = 1; $i <= 6; $i++)
                     <input type="text" maxlength="1" name="code[]" class="code-input" required>

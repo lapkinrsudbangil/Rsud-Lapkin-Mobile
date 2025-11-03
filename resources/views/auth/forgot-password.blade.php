@@ -141,9 +141,9 @@
         <form method="POST" action="{{ route('forgot.post') }}">
             @csrf
             <div class="form-group">
-                <label>Email</label>
-                <input type="email" name="email" value="{{ old('email') }}" required 
-                       placeholder="Masukkan email yang terdaftar">
+                <label>ID / Email</label>
+                <input type="text" name="email_or_id" value="{{ old('email_or_id') }}" required 
+                       placeholder="Masukkan ID atau email yang terdaftar">
             </div>
 
             <button type="submit">Kirim Kode Verifikasi</button>
