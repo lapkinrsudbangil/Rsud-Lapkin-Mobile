@@ -4,7 +4,11 @@
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
     <h1>Perjanjian Kinerja</h1>
     <div>
-      <a href="{{ route('perjanjian.create') }}" class="btn">+ Buat Perjanjian</a>
+      @if($perjanjians->isEmpty())
+        <a href="{{ route('perjanjian.create') }}" class="btn">+ Buat Perjanjian</a>
+      @else
+        <a href="{{ route('perjanjian.create') }}" class="btn">+ Tambah Indikator / Perjanjian</a>
+      @endif
     </div>
   </div>
 
@@ -27,7 +31,12 @@
             <div style="display:flex; gap:8px;">
               <a href="{{ route('laporan.create_from_perjanjian', $p->id) }}" class="btn">Buat Laporan</a>
               <a href="{{ route('perjanjian.print', $p->id) }}" target="_blank" class="btn" style="background:#007bff;">Lihat Cetak</a>
-              <a href="{{ route('perjanjian.pdf', $p->id) }}" target="_blank" class="btn" style="background:#28a745;">Export PDF</a>
+              <a href="{{ route('perjanjian.edit', $p->id) }}" class="btn" style="background:#ffc107;">Edit</a>
+              <form action="{{ route('perjanjian.destroy', $p->id) }}" method="POST" onsubmit="return confirm('Hapus perjanjian ini?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn" style="background:#dc3545;">Hapus</button>
+              </form>
             </div>
           </div>
         @endforeach

@@ -272,38 +272,38 @@
       @csrf
 
       <label>Nama Pegawai</label>
-      <input type="text" name="nama" value="{{ $user->nama }}" readonly>
+      <input type="text" name="nama" value="{{ $user->nama }}">
 
       <label>ID Pegawai</label>
-      <input type="text" name="id_pegawai" value="{{ $user->id_pegawai }}" readonly>
+      <input type="text" name="id_pegawai" value="{{ $user->id_pegawai }}">
 
       <label>NIP</label>
-      <input type="text" name="nip" value="{{ $user->nip }}" readonly>
+      <input type="text" name="nip" value="{{ $user->nip }}">
 
       <label>Email</label>
-      <input type="email" name="email" value="{{ $user->email }}" readonly>
+      <input type="email" name="email" value="{{ $user->email }}">
 
       <label>Jabatan</label>
-      <input type="text" name="jabatan" value="{{ $user->jabatan }}" readonly>
+      <input type="text" name="jabatan" value="{{ $user->jabatan }}">
 
       <label>Pangkat</label>
-      <input type="text" name="pangkat" value="{{ $user->pangkat }}" readonly>
+      <input type="text" name="pangkat" value="{{ $user->pangkat }}">
+
+      <label>Golongan</label>
+      <input type="text" name="golongan" value="{{ $user->golongan ?? '' }}">
 
       <label>Divisi</label>
-      <input type="text" name="divisi" value="{{ $user->divisi }}" readonly>
+      <input type="text" name="divisi" value="{{ $user->divisi }}">
 
       <input type="hidden" name="signature_data" id="signatureData">
       <input type="hidden" id="croppedPhotoData" name="croppedPhotoData">
 
-      <button type="button" class="edit-btn" id="editBtn">Edit Profil</button>
-      <button type="submit" class="edit-btn" id="saveBtn" style="display:none;">Simpan</button>
-    
+      <button type="submit" class="edit-btn" id="saveBtn">Simpan</button>
+
       <div class="right-section">
         <div class="photo" id="photoPreview" tabindex="0" role="button" aria-label="Ubah foto profil">
           @if($user->foto_profil)
-            @php
-              $fp = $user->foto_profil;
-            @endphp
+            @php $fp = $user->foto_profil; @endphp
             <img src="{{ (str_starts_with($fp, 'http') || str_starts_with($fp, 'https')) ? $fp : asset('storage/' . $fp) }}" alt="Foto Profil">
           @else
             FOTO PROFIL
@@ -315,7 +315,7 @@
         <div class="signature-box" id="signatureBox">
           @if($user->tanda_tangan)
             @php $tt = $user->tanda_tangan; @endphp
-            <img src="{{ (str_starts_with($tt, 'http') || str_starts_with($tt, 'https')) ? $tt : asset('storage/' . $tt) }}" width="200" height="100">
+            <img src="{{ (str_starts_with($tt, 'http') || str_starts_with($tt, 'https')) ? $tt : asset('storage/' . $tt) }}" style="max-width:100%; max-height:100%;">
           @else
             Klik untuk tanda tangan
           @endif
@@ -374,22 +374,10 @@
   let croppie = null;
   let signaturePad = null;
   
-  // Form editing
-  const editBtn = document.getElementById('editBtn');
+  // Simple form controls
   const saveBtn = document.getElementById('saveBtn');
-  const inputs = document.querySelectorAll('input[type="text"], input[type="email"]');
   const fotoInput = document.getElementById('fotoInput');
   const photoPreview = document.getElementById('photoPreview');
-  
-  editBtn.addEventListener('click', () => {
-    inputs.forEach(input => {
-      if (!['id_pegawai', 'nip'].includes(input.name)) {
-        input.removeAttribute('readonly');
-      }
-    });
-    editBtn.style.display = 'none';
-    saveBtn.style.display = 'inline-block';
-  });
 
   // Make photo clickable to open file picker
   const photoElement = document.getElementById('photoPreview');

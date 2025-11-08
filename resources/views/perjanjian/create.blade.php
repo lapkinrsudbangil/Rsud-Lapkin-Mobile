@@ -6,16 +6,39 @@
   </div>
 
   <div class="card">
-    <form method="POST" action="{{ route('perjanjian.store') }}">
+    <form method="POST" action="{{ isset($editing) ? route('perjanjian.update', $editing->id) : route('perjanjian.store') }}">
       @csrf
+      @if(isset($editing))
+        @method('PUT')
+      @endif
+      <div style="margin-bottom:12px;">
+        <label>Pilih Perjanjian yang ada (opsional)</label>
+        <select id="existingPerjanjian" name="existing_perjanjian_id" class="form-control">
+          <option value="">-- Baru / Tidak memilih --</option>
+          @foreach(($perjanjians ?? []) as $ep)
+            <option value="{{ $ep->id }}"
+              data-jabatan="{{ e($ep->jabatan) }}"
+              data-tahun="{{ e($ep->tahun) }}"
+              data-pihak1_name="{{ e($ep->pihak1_name) }}"
+              data-pihak1_jabatan="{{ e($ep->pihak1_jabatan) }}"
+              data-pihak1_nip="{{ e($ep->pihak1_nip) }}"
+              data-pihak1_pangkat="{{ e($ep->pihak1_pangkat) }}"
+              data-pihak2_name="{{ e($ep->pihak2_name) }}"
+              data-pihak2_jabatan="{{ e($ep->pihak2_jabatan) }}"
+              data-pihak2_nip="{{ e($ep->pihak2_nip) }}"
+              data-pihak2_pangkat="{{ e($ep->pihak2_pangkat) }}"
+            >{{ $ep->jabatan }} — {{ $ep->tahun }} @if($ep->judul) ({{ $ep->judul }}) @endif</option>
+          @endforeach
+        </select>
+      </div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
         <div>
           <label>Jabatan</label>
-          <input name="jabatan" class="form-control" required>
+          <input name="jabatan" class="form-control" required value="{{ old('jabatan', $editing->jabatan ?? ($user->jabatan ?? '')) }}">
         </div>
         <div>
           <label>Tahun</label>
-          <input name="tahun" class="form-control">
+          <input name="tahun" class="form-control" value="{{ old('tahun', $editing->tahun ?? date('Y')) }}">
         </div>
       </div>
 
@@ -23,80 +46,85 @@
         <div style="flex:1;">
           <label>Jenis Perjanjian</label>
           <select name="jenis" id="jenisPerjanjian" class="form-control">
-            <option value="normal">Perjanjian Kinerja</option>
-            <option value="perubahan">Perjanjian Kinerja Perubahan</option>
+            <option value="normal" {{ old('jenis', $editing->jenis ?? '') === 'normal' ? 'selected' : '' }}>Perjanjian Kinerja</option>
+            <option value="perubahan" {{ old('jenis', $editing->jenis ?? '') === 'perubahan' ? 'selected' : '' }}>Perjanjian Kinerja Perubahan</option>
           </select>
         </div>
         <div style="width:200px;">
           <label>Tanggal Pembuatan</label>
-          <input type="date" name="tanggal_pembuatan" class="form-control">
+          <input type="date" name="tanggal_pembuatan" class="form-control" value="{{ old('tanggal_pembuatan', isset($editing) && $editing->tanggal_pembuatan ? $editing->tanggal_pembuatan : (date('Y-m-d'))) }}">
         </div>
         <div style="width:220px;">
           <label>Mode Perubahan</label>
           <select name="change_mode" id="changeMode" class="form-control">
-            <option value="ubah_target">Ubah Target Saja</option>
-            <option value="ubah_perjanjian">Ubah Seluruh Perjanjian</option>
+            <option value="ubah_target" {{ old('change_mode', $editing->change_mode ?? '') === 'ubah_target' ? 'selected' : '' }}>Ubah Target Saja</option>
+            <option value="ubah_perjanjian" {{ old('change_mode', $editing->change_mode ?? '') === 'ubah_perjanjian' ? 'selected' : '' }}>Ubah Seluruh Perjanjian</option>
           </select>
         </div>
       </div>
 
       <div style="margin-top:12px;">
         <label>Judul</label>
-        <input name="judul" class="form-control" required>
+        <input name="judul" class="form-control" required value="{{ old('judul', $editing->judul ?? '') }}">
       </div>
 
       <!-- Template area: description + indikator table -->
       <div style="margin-top:12px;">
         <label>Deskripsi (Template)</label>
-        <textarea name="deskripsi" id="deskripsiField" class="form-control" rows="6"></textarea>
+        <textarea name="deskripsi" id="deskripsiField" class="form-control" rows="6">{{ old('deskripsi', $editing->deskripsi ?? '') }}</textarea>
       </div>
 
-      <div style="margin-top:12px;">
-        <label>Daftar Indikator</label>
-        <div style="overflow:auto; border:1px solid #eee; padding:8px; border-radius:8px; background:#fff;">
-          <table id="indikatorTable" style="width:100%; border-collapse:collapse;">
-            <thead>
-              <tr style="background:#f6f6f6;">
-                <th style="padding:6px; border:1px solid #eee;">Indikator</th>
-                <th style="padding:6px; border:1px solid #eee;">Satuan</th>
-                <th style="padding:6px; border:1px solid #eee;">Target</th>
-                <th style="padding:6px; border:1px solid #eee; width:120px;">Bobot (%)</th>
-                <th style="padding:6px; border:1px solid #eee; width:120px;">Keterangan</th>
-                <th style="padding:6px; border:1px solid #eee; width:60px;"><button type="button" id="addIndikatorBtn" class="btn">+</button></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-name" placeholder="Contoh: Angka Kematian Ibu"></td>
-                <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-satuan" placeholder="% / pasien / kasus"></td>
-                <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-target" placeholder="Contoh: 5"></td>
-                <td style="padding:6px; border:1px solid #eee;"><input type="number" step="0.01" class="form-control indikator-bobot" placeholder="10"></td>
-                <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-ket" placeholder="Catatan"></td>
-                <td style="padding:6px; border:1px solid #eee; text-align:center;"><button type="button" class="btn removeRowBtn">-</button></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <input type="hidden" name="indikator" id="indikatorJsonInput">
-      </div>
+      {{-- Indikator disabled for now — focus on first page print output --}}
 
   <hr style="margin:18px 0; border:none; border-top:1px solid #eee;">
 
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start;">
         <div>
-          <label>Nama Pihak 1</label>
-          <input name="pihak1_name" class="form-control">
+          <label>Pihak Pertama (Anda)</label>
+          <div style="background:#f9f9f9; padding:10px; border-radius:8px;">
+            <div><strong>Nama:</strong> {{ $user->nama ?? $user->name ?? '-' }}</div>
+            <div><strong>Jabatan:</strong> {{ $user->jabatan ?? '-' }}</div>
+          </div>
+          {{-- Hidden inputs untuk pihak1 agar disimpan saat submit (ambil dari profil) --}}
+          <input type="hidden" name="pihak1_name" value="{{ old('pihak1_name', $editing->pihak1_name ?? $user->nama ?? $user->name ?? '') }}">
+          <input type="hidden" name="pihak1_jabatan" value="{{ old('pihak1_jabatan', $editing->pihak1_jabatan ?? $user->jabatan ?? '') }}">
+          <input type="hidden" name="pihak1_pangkat" value="{{ old('pihak1_pangkat', $editing->pihak1_pangkat ?? $user->pangkat ?? '') }}">
+          <input type="hidden" name="pihak1_golongan" value="{{ old('pihak1_golongan', $editing->pihak1_golongan ?? $user->golongan ?? '') }}">
+          <input type="hidden" name="pihak1_nip" value="{{ old('pihak1_nip', $editing->pihak1_nip ?? $user->nip ?? '') }}">
+          {{-- tampilkan tanda tangan pihak pertama dari profil jika ada --}}
           <div style="margin-top:8px;">Tanda Tangan Pihak 1</div>
-          <canvas id="sigPihak1" style="width:100%; height:120px; border:1px solid #ddd; border-radius:8px; background:#fff;"></canvas>
-          <input type="hidden" name="pihak1_signature" id="pihak1_signature">
+          @if(!empty($user->tanda_tangan))
+            @php $tt = $user->tanda_tangan; @endphp
+            <div style="margin-top:6px;">
+              <img src="{{ (str_starts_with($tt, 'http') || str_starts_with($tt, 'https')) ? $tt : asset('storage/' . $tt) }}" alt="TT Pihak 1" style="max-width:100%; max-height:120px; border:1px solid #ddd; border-radius:6px; background:#fff;">
+            </div>
+            <input type="hidden" name="pihak1_signature" value="{{ $user->tanda_tangan }}">
+          @else
+            <div style="margin-top:6px;">(Belum ada tanda tangan di profil)</div>
+            <input type="hidden" name="pihak1_signature" id="pihak1_signature">
+          @endif
         </div>
 
         <div>
           <label>Nama Pihak 2</label>
-          <input name="pihak2_name" class="form-control">
+          <input name="pihak2_name" class="form-control" value="{{ old('pihak2_name', $editing->pihak2_name ?? '') }}">
+          <div style="margin-top:8px; display:flex; gap:8px;">
+            <div style="flex:1;">
+              <label>Jabatan Pihak 2</label>
+              <input name="pihak2_jabatan" class="form-control" value="{{ old('pihak2_jabatan', $editing->pihak2_jabatan ?? '') }}">
+            </div>
+            <div style="width:180px;">
+              <label>Pangkat</label>
+              <input name="pihak2_pangkat" class="form-control" value="{{ old('pihak2_pangkat', $editing->pihak2_pangkat ?? '') }}">
+            </div>
+            <div style="width:200px;">
+              <label>NIP Pihak 2</label>
+              <input name="pihak2_nip" class="form-control" value="{{ old('pihak2_nip', $editing->pihak2_nip ?? '') }}">
+            </div>
+          </div>
           <div style="margin-top:8px;">Tanda Tangan Pihak 2</div>
           <canvas id="sigPihak2" style="width:100%; height:120px; border:1px solid #ddd; border-radius:8px; background:#fff;"></canvas>
-          <input type="hidden" name="pihak2_signature" id="pihak2_signature">
+          <input type="hidden" name="pihak2_signature" id="pihak2_signature" value="{{ old('pihak2_signature', $editing->pihak2_signature ?? '') }}">
         </div>
       </div>
 
@@ -131,54 +159,16 @@
     }};
   }
 
-  const s1 = initSig('sigPihak1', 'pihak1_signature');
+  // Only initialize signature pad for pihak2 (pihak1 signature comes from profile)
+  // Only pihak2 signature is collected here; pihak1 is taken from profile
   const s2 = initSig('sigPihak2', 'pihak2_signature');
 
   document.getElementById('savePerjanjianBtn').addEventListener('click', (e) => {
-    // save signatures
-    s1.save(); s2.save();
-    // collect indikator table rows into hidden input as JSON
-    collectIndikatorRows();
+    // save pihak2 signature
+    s2.save();
     // allow form to submit
   });
-
-  // indikator table helpers
-  const addBtn = document.getElementById('addIndikatorBtn');
-  addBtn.addEventListener('click', () => addIndikatorRow());
-
-  function addIndikatorRow(data = {}) {
-    const tbody = document.querySelector('#indikatorTable tbody');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-name" value="${escapeHtml(data.name||'')}" placeholder="Contoh: ..."></td>
-      <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-satuan" value="${escapeHtml(data.satuan||'')}" placeholder="% / pasien / kasus"></td>
-      <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-target" value="${escapeHtml(data.target||'')}" placeholder="Contoh: 5"></td>
-      <td style="padding:6px; border:1px solid #eee;"><input type="number" step="0.01" class="form-control indikator-bobot" value="${escapeHtml(data.bobot||'')}"></td>
-      <td style="padding:6px; border:1px solid #eee;"><input type="text" class="form-control indikator-ket" value="${escapeHtml(data.ket||'')}"></td>
-      <td style="padding:6px; border:1px solid #eee; text-align:center;"><button type="button" class="btn removeRowBtn">-</button></td>
-    `;
-    tbody.appendChild(tr);
-    tr.querySelector('.removeRowBtn').addEventListener('click', () => tr.remove());
-  }
-
-  function collectIndikatorRows() {
-    const rows = [];
-    document.querySelectorAll('#indikatorTable tbody tr').forEach(r => {
-      const name = r.querySelector('.indikator-name')?.value || '';
-      const satuan = r.querySelector('.indikator-satuan')?.value || '';
-      const target = r.querySelector('.indikator-target')?.value || '';
-      const bobot = r.querySelector('.indikator-bobot')?.value || '';
-      const ket = r.querySelector('.indikator-ket')?.value || '';
-      if (name.trim() !== '') {
-        rows.push({ indikator: name.trim(), satuan: satuan.trim(), target: target.trim(), bobot: bobot === '' ? null : parseFloat(bobot), keterangan: ket.trim() });
-      }
-    });
-    document.getElementById('indikatorJsonInput').value = JSON.stringify(rows);
-  }
-
-  function escapeHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+  // indikator functionality removed for now to focus on first-page print
 
   // Auto-populate description template based on jenis & change mode
   (function(){
@@ -237,6 +227,36 @@
 
     // initial populate on load
     tryPopulate();
+  })();
+
+  // If user selects an existing perjanjian, prefill jabatan/tahun
+  (function(){
+    const existingSel = document.getElementById('existingPerjanjian');
+    if (!existingSel) return;
+    existingSel.addEventListener('change', function() {
+      const opt = this.options[this.selectedIndex];
+      const jab = opt.getAttribute('data-jabatan') || '';
+      const tahun = opt.getAttribute('data-tahun') || '';
+      const p1 = opt.getAttribute('data-pihak1_name') || '';
+      const p1jab = opt.getAttribute('data-pihak1_jabatan') || '';
+      const p1nip = opt.getAttribute('data-pihak1_nip') || '';
+      const p1pangkat = opt.getAttribute('data-pihak1_pangkat') || '';
+      const p2 = opt.getAttribute('data-pihak2_name') || '';
+      const p2jab = opt.getAttribute('data-pihak2_jabatan') || '';
+      const p2nip = opt.getAttribute('data-pihak2_nip') || '';
+      const p2pangkat = opt.getAttribute('data-pihak2_pangkat') || '';
+
+      if (jab) document.querySelector('input[name="jabatan"]').value = jab;
+      if (tahun) document.querySelector('input[name="tahun"]').value = tahun;
+      if (p1) document.querySelector('input[name="pihak1_name"]').value = p1;
+      if (p1jab) document.querySelector('input[name="pihak1_jabatan"]').value = p1jab;
+      if (p1nip) document.querySelector('input[name="pihak1_nip"]').value = p1nip;
+      if (p1pangkat) document.querySelector('input[name="pihak1_pangkat"]').value = p1pangkat;
+      if (p2) document.querySelector('input[name="pihak2_name"]').value = p2;
+      if (p2jab) document.querySelector('input[name="pihak2_jabatan"]').value = p2jab;
+      if (p2nip) document.querySelector('input[name="pihak2_nip"]').value = p2nip;
+      if (p2pangkat) document.querySelector('input[name="pihak2_pangkat"]').value = p2pangkat;
+    });
   })();
 </script>
 @endpush

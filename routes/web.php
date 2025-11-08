@@ -33,6 +33,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/perjanjian', [App\Http\Controllers\PerjanjianController::class, 'index'])->name('perjanjian.index');
     Route::get('/perjanjian/create', [App\Http\Controllers\PerjanjianController::class, 'create'])->name('perjanjian.create');
     Route::post('/perjanjian', [App\Http\Controllers\PerjanjianController::class, 'store'])->name('perjanjian.store');
+    Route::get('/perjanjian/{id}/edit', [App\Http\Controllers\PerjanjianController::class, 'edit'])->name('perjanjian.edit');
+    Route::put('/perjanjian/{id}', [App\Http\Controllers\PerjanjianController::class, 'update'])->name('perjanjian.update');
+    Route::delete('/perjanjian/{id}', [App\Http\Controllers\PerjanjianController::class, 'destroy'])->name('perjanjian.destroy');
     Route::get('/perjanjian/{id}/print', [App\Http\Controllers\PerjanjianController::class, 'print'])->name('perjanjian.print');
     Route::get('/perjanjian/{id}/pdf', [App\Http\Controllers\PerjanjianController::class, 'pdf'])->name('perjanjian.pdf');
 

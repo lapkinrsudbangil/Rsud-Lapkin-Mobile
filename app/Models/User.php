@@ -17,6 +17,7 @@ class User extends Authenticatable
         'nip',
         'jabatan',
         'pangkat',
+        'golongan',
         'divisi',
         'password',
         'foto_profil',

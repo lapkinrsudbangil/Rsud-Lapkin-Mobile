@@ -27,6 +27,7 @@ class ProfileController extends Controller
             'nip' => 'nullable|string|max:50',
             'jabatan' => 'nullable|string|max:100',
             'pangkat' => 'nullable|string|max:100',
+            'golongan' => 'nullable|string|max:100',
             'divisi' => 'nullable|string|max:100',
             'foto_profil' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'croppedPhotoData' => 'nullable|string',
